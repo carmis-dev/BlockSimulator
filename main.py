@@ -9,12 +9,10 @@ BLOCK_POOL_CAPACITY = 99
 MAX_LOG_SIZE = 1000
 
 
-# todo proper typing
 def block_producer(pool):
     while True:
         if 0 <= len(pool) <= BLOCK_POOL_CAPACITY:
             new_block = Block()
-            # todo appending a dict is inefficient, but will be easier to locate for the consumer
             pool.append(new_block.to_dict())
         else:
             print("simulate log - WARNING - block pool at full capacity")
@@ -64,14 +62,14 @@ def get_state():
             validators = []
             for transaction in block_data_transactions:
                 validator = {
-                    'id': len(validators),  # Assign a unique ID to each validator
+                    'id': len(validators),
                     'address': transaction['address'],
                     'operators': [operator['operator_id'] for operator in transaction.get('register', [])],
                 }
                 validators.append(validator)
 
                 for operator_id in validator['operators']:
-                    operator_validator_mapping[operator_id].append(len(validators) - 1)  # Append the validator ID
+                    operator_validator_mapping[operator_id].append(len(validators) - 1)
 
             for operator in operators:
                 operator_id = operator['id']
@@ -101,12 +99,9 @@ def get_state():
 if __name__ == '__main__':
     try:
         manager = Manager()
-        # block_state_log = manager.dict()
         block_manager = manager.dict()
         block_pool = manager.list()
 
-        # with Manager() as manager:
-        # block_pool = manager.list()
         producer_process = Process(target=block_producer, args=(block_pool,))
         producer_process.start()
         consumer_process = Process(target=block_consumer, args=(block_pool, block_manager))
